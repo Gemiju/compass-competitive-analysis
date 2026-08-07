@@ -1,0 +1,83 @@
+# Compass 竞品分析 · 项目配置模板
+# 复制本文件为 project.yaml 并按需修改。SKILL 启动时优先读取 project.yaml，缺失则用本模板默认值。
+
+# === 必填 ===
+product:
+  name: "商米 CPAD"           # 主品名称
+  category: "b2b_commercial_tablet"  # 品类，参考 taxonomy.md
+  self_product: true           # 是否是用户方产品
+
+competitors:
+  - name: "iMin"
+    products: ["天之河 TZH-P13"]  # 已知竞品仅作为搜索起点
+    priority: "P0"             # P0=核心对标 / P1=次要 / P2=背景
+  # - name: "Lenovo"
+  #   products: ["ThinkSmart Tab"]
+  #   priority: "P1"
+
+market:
+  country: "IN"                # ISO 国家代码，IN=印度
+  language: "en"               # 评论/官网语言
+  region: "South Asia"         # 区域
+
+time_window:
+  start: "2026-04-01"          # 数据时间窗起（默认最近 90 天）
+  end: "2026-06-30"
+  default_days: 90             # 若未指定 start/end，取最近 N 天
+
+business_decision:             # 本次分析要支持的业务决策
+  type: "pricing_switch"       # pricing_switch / gtm_launch / eol_transition / channel_expansion
+  description: "H2 印度市场价格切换决策，需识别 iMin 折扣栈与价格定位"
+
+# === 数据源 ===
+data_sources:
+  local_evidence_db:           # 本地证据库（confidence=high）
+    enabled: true
+    path: "assets/evidence_db/"
+    files:
+      - path: "../../CPAD竞对.xlsx"          # 相对路径，指向用户已有文件
+        type: "excel"
+        competitor: "iMin"                   # 该文件主要竞品
+        aspect_hint: "feature_benchmark"     # 数据用途提示
+      - path: "../../iMin IN Q2 FY26 Partner Price List 260411.pdf"
+        type: "pdf"
+        competitor: "iMin"
+        aspect_hint: "pricing"
+  web_search:                  # 联网搜索兜底（confidence=medium）
+    enabled: true
+    sources:
+      - "reddit:smarthome,B2B,sysadmin"
+      - "youtube:transcript"
+      - "amazon:reviews"
+      - "official_site"
+    fallback_when_local_miss: true
+
+# === 可选 ===
+icp:
+  industry: ["retail", "qsr", "hospitality"]   # 目标行业
+  persona: ["procurement_officer", "it_admin", "channel_partner"]
+  scenario: ["pos_checkout", "self_service_kiosk"]
+  icp_value_metric: "per_inch_display"         # ICP 价值度量，参考 pricing_models.md
+
+analysis_depth: "deep"          # basic / deep
+output_dir: "examples/cpad"     # 默认按竞品_时间窗命名
+
+# === 自定义 taxonomy 扩展 ===
+custom_taxonomy:
+  # 若品类需要新 aspect，在此补充
+  # fda_cert:
+  #   level: "service"
+  #   unit: "yes/no"
+  #   decision_impact: "high"
+
+# === 验证门槛 ===
+verification:
+  min_independent_authors: 3    # VOC 类证据至少需 3 个独立作者
+  min_evidence_per_competitor: 5  # 每个竞品至少 5 条证据
+  flag_uncited_claims: true     # 未引用声明打 ⚠️ 未验证
+
+# === 假设（用户未补充时显式列出） ===
+assumptions:
+  - "印度市场默认英语评论"
+  - "时间窗默认最近 90 天"
+  - "未指定 ICP 价值度量时用 per_inch_display"
