@@ -1,0 +1,11 @@
+{
+  "name": "compass-competitive-analysis",
+  "version": "1.0.0",
+  "description": "Compass 竞品分析 - 通用竞品分析 AI 产品",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {}
+}
