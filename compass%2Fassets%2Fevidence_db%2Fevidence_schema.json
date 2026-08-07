@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Compass 竞品分析 · 统一证据 Schema",
+  "description": "所有 Step 共享的证据数据结构。这是 RAG 架构的核心，也是 MCP 思想实现 Step 间证据互通的基础。每条声明必须引用一个或多个 evidence_id。",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "competitor",
+    "aspect",
+    "value",
+    "source_type",
+    "source_url",
+    "source_date",
+    "confidence",
+    "verified_by"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EV-\\d{4}-\\d{3}$",
+      "description": "证据唯一 ID，格式 EV-YYYY-NNN，如 EV-2026-001"
+    },
+    "competitor": {
+      "type": "string",
+      "description": "竞品名称，如 iMin / Lenovo / Apple。主品填 'self'"
+    },
+    "product": {
+      "type": "string",
+      "description": "具体产品型号，如 天之河 TZH-P13 / CPAD T2"
+    },
+    "aspect": {
+      "type": "string",
+      "description": "证据维度。功能类参考 taxonomy.md（display_size / cpu / os / scenario_retail...）；价格类（list_price / distributor_discount / reseller_margin / price_per_unit）；渠道类（channel_partner / margin_structure / voc_quote / message_house）"
+    },
+    "value": {
+      "type": "string",
+      "description": "证据值。如 '10.1 inch' / 'USD 350' / 'pos_terminal_retail' / 'installation took 4 hours'"
+    },
+    "unit": {
+      "type": "string",
+      "description": "单位。如 inch / USD / % / null（文本型证据）"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": ["positive", "neutral", "negative", "mixed", "not_applicable"],
+      "default": "not_applicable",
+      "description": "情感极性。VOC 类证据必填；规格类填 not_applicable"
+    },
+    "verbatim_quote": {
+      "type": ["string", "null"],
+      "description": "VOC 原声原文（带引号）。非 VOC 类填 null"
+    },
+    "persona": {
+      "type": ["string", "null"],
+      "enum": ["procurement_officer", "cfo", "it_admin", "channel_partner", "competitor_sales", "industry_analyst", "end_user", null],
+      "description": "persona 标签。VOC 类必填；规格类填 null。详见 icp_persona_library.md"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["official_spec", "price_list", "review", "forum", "analyst", "internal_data", "web_search"],
+      "description": "证据来源类型"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "证据 URL。本地文件用 file:// 协议（如 file://evidence_db/imin_price_q2fy26.pdf#p2）；联网用 https://"
+    },
+    "source_date": {
+      "type": "string",
+      "format": "date",
+      "description": "证据日期（ISO 8601，如 2026-04-11）。价目表用发布日期；评论用发布日期；联网搜索用抓取日期"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "description": "置信度。high=本地证据库/官方规格；medium=联网搜索/第三方评论；low=LLM 推断"
+    },
+    "verified_by": {
+      "type": "string",
+      "enum": ["local_evidence_db", "web_search", "llm_inference", "user_provided"],
+      "description": "验证方式"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["A_feature", "B_pricing", "C_channel", "shared"],
+      "default": "shared",
+      "description": "证据所属 Step。shared 表示多 Step 共用"
+    },
+    "decision_impact": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "default": "medium",
+      "description": "对 ICP 决策的影响度。Step 5 Review 阶段用于过滤无关功能差异"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "description": "分析师备注"
+    }
+  },
+  "examples": [
+    {
+      "evidence_id": "EV-2026-001",
+      "competitor": "iMin",
+      "product": "天之河 TZH-P13",
+      "aspect": "display_size",
+      "value": "10.1 inch",
+      "unit": "inch",
+      "sentiment": "not_applicable",
+      "verbatim_quote": null,
+      "persona": null,
+      "source_type": "official_spec",
+      "source_url": "file://evidence_db/cpad_competitive.xlsx#Sheet1",
+      "source_date": "2026-04-11",
+      "confidence": "high",
+      "verified_by": "local_evidence_db",
+      "stage": "A_feature",
+      "decision_impact": "medium",
+      "notes": "与 CPAD 同尺寸，非差异化点"
+    },
+    {
+      "evidence_id": "EV-2026-002",
+      "competitor": "iMin",
+      "product": "天之河 TZH-P13",
+      "aspect": "distributor_price",
+      "value": "USD 245",
+      "unit": "USD",
+      "sentiment": "not_applicable",
+      "verbatim_quote": null,
+      "persona": null,
+      "source_type": "price_list",
+      "source_url": "file://evidence_db/imin_price_q2fy26.pdf#p3",
+      "source_date": "2026-04-11",
+      "confidence": "high",
+      "verified_by": "local_evidence_db",
+      "stage": "B_pricing",
+      "decision_impact": "high",
+      "notes": "Q2 FY26 印度经销商价目表，可反推折扣栈"
+    },
+    {
+      "evidence_id": "EV-2026-003",
+      "competitor": "iMin",
+      "product": "天之河 TZH-P13",
+      "aspect": "voc_installation",
+      "value": "安装复杂，需 IT 支持",
+      "unit": null,
+      "sentiment": "negative",
+      "verbatim_quote": "took 4 hours and needed IT to configure the printer profile",
+      "persona": "it_admin",
+      "source_type": "forum",
+      "source_url": "https://www.reddit.com/r/smarthome/comments/xxxxx",
+      "source_date": "2026-06-15",
+      "confidence": "medium",
+      "verified_by": "web_search",
+      "stage": "C_channel",
+      "decision_impact": "high",
+      "notes": "Reddit r/smarthome 抓取，可作为 CPAD 易用性差异化机会"
+    }
+  ]
+}
