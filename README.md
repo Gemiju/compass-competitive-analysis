@@ -6,12 +6,12 @@
 
 <div align="center">
 
-### 👉 [点击查看竞品分析报告 Demo](https://raw.githack.com/Gemiju/compass-competitive-analysis/main/demo.html) 👈
+### 👉 [点击查看竞品分析报告 Demo](https://gemiju.github.io/compass-competitive-analysis/demo.html) 👈
 
 </div>
 
 > 上面链接打开就是一个完整的可视化竞品分析报告页面，适合作品集展示。
-> 如果链接打不开，请等 1-2 分钟（GitHub 缓存同步）后重试。
+> 如果链接打不开，请等 1-2 分钟（GitHub Pages 部署中）后重试。
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### 方式一：查看案例报告
 
-- **在线浏览**：[点击查看 Demo](https://raw.githack.com/Gemiju/compass-competitive-analysis/main/demo.html)
+- **在线浏览**：[点击查看 Demo](https://gemiju.github.io/compass-competitive-analysis/demo.html)
 - **本地查看**：下载 `compass/examples/商用平板/demo.html`，用浏览器打开
 
 ### 方式二：部署 Web 应用
