@@ -2,13 +2,26 @@
 
 > 输入竞品名称，自动生成包含「功能对标、价格策略、渠道打法」的结构化竞品分析报告，每条结论带证据引用，杜绝 AI 瞎编。
 
+## 🎯 在线 Demo
+
+<div align="center">
+
+### 👉 [点击查看竞品分析报告 Demo](https://raw.githack.com/Gemiju/compass-competitive-analysis/main/demo.html) 👈
+
+</div>
+
+> 上面链接打开就是一个完整的可视化竞品分析报告页面，适合作品集展示。
+> 如果链接打不开，请等 1-2 分钟（GitHub 缓存同步）后重试。
+
+---
+
 ## 项目组成
 
 | 模块 | 路径 | 说明 |
 |---|---|---|
 | **Compass Skill** | `compass/` | TRAE AI Skill，核心竞品分析引擎 |
 | **Web 演示应用** | `compass-app/` | Vercel 部署的网页应用，让非技术用户也能体验 |
-| **案例报告** | `compass/examples/` | 脱敏竞品分析案例（单页 Demo） |
+| **案例报告** | `compass/examples/商用平板/demo.html` | 脱敏竞品分析案例（单页 Demo） |
 
 ## 核心特性
 
@@ -21,9 +34,10 @@
 
 ### 方式一：查看案例报告
 
-打开 `compass/examples/商用平板/demo.html` 查看单页可视化报告。
+- **在线浏览**：[点击查看 Demo](https://raw.githack.com/Gemiju/compass-competitive-analysis/main/demo.html)
+- **本地查看**：下载 `compass/examples/商用平板/demo.html`，用浏览器打开
 
-### 部署 Web 应用
+### 方式二：部署 Web 应用
 
 ```bash
 cd compass-app
@@ -36,7 +50,7 @@ vercel --prod # 部署上线
 1. **前端输入**（推荐）：在网页上直接输入 DeepSeek API Key，无需配置环境变量
 2. **环境变量**：在 Vercel 中设置 `DEEPSEEK_API_KEY`（[DeepSeek 开发者平台](https://platform.deepseek.com/)获取）
 
-### 方式二：在 TRAE 中使用 Skill
+### 方式三：在 TRAE 中使用 Skill
 
 将 `compass/` 文件夹导入 TRAE Skill 系统，在对话中输入：
 
@@ -68,27 +82,28 @@ vercel --prod # 部署上线
 
 ```
 .
-├── compass/                    # AI Skill（核心引擎）
-│   ├── SKILL.md                # Skill 定义（触发规则 + 工作流）
-│   ├── README.md               # Skill 产品介绍
-│   ├── references/             # 知识库（分类规则、证据规则等）
-│   ├── scripts/                # Python 工具脚本
-│   ├── templates/              # 报告模板
-│   ├── assets/                 # 证据库 Schema + 项目配置模板
-│   └── examples/               # 案例报告
+├── demo.html                    # 单页可视化 Demo（根目录副本，便于在线访问）
+├── compass/                     # AI Skill（核心引擎）
+│   ├── SKILL.md                 # Skill 定义（触发规则 + 工作流）
+│   ├── README.md                # Skill 产品介绍
+│   ├── references/              # 知识库（分类规则、证据规则等）
+│   ├── scripts/                 # Python 工具脚本
+│   ├── templates/               # 报告模板
+│   ├── assets/                  # 证据库 Schema + 项目配置模板
+│   └── examples/                # 案例报告
 │       └── 商用平板/
-│           └── demo.html       # 单页可视化 Demo
-├── compass-app/                # Web 演示应用
-│   ├── index.html              # 前端页面
-│   ├── api/analyze.js          # 后端 API（调用 DeepSeek）
-│   ├── vercel.json             # 部署配置
+│           └── demo.html        # 单页可视化 Demo
+├── compass-app/                 # Web 演示应用
+│   ├── index.html               # 前端页面
+│   ├── api/analyze.js           # 后端 API（调用 DeepSeek）
+│   ├── vercel.json              # 部署配置
 │   └── package.json
-└── README.md                   # 本文件
+└── README.md                    # 本文件
 ```
 
 ## 案例报告说明
 
-`compass/examples/商用平板/demo.html` 是一份脱敏后的单页可视化竞品分析报告，涵盖：
+`demo.html` 是一份脱敏后的单页可视化竞品分析报告，涵盖：
 
 - 产品概述与核心差异化
 - 关键规格对比
