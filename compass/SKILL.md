@@ -194,4 +194,4 @@ dependency:
 
 ## 演示案例
 
-`examples/cpad/` 提供一份基于商米 CPad 11 vs 10 款竞品的样例报告，供 HR 验证产品价值。实际使用时由 SKILL 自动覆盖。
+`examples/商用平板/` 提供一份脱敏的单页可视化 Demo，展示产品核心价值。实际使用时由 SKILL 自动覆盖。

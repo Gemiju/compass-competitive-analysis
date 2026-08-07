@@ -11,7 +11,7 @@ Compass 竞品分析 · Step 5: Gap Matrix Generator
 Review 阶段（COT 自我审查）由 SKILL LLM 基于 gap_matrix.json 完成。
 
 Usage:
-    python gap_matrix.py --input evidence.json --self-product "商米 CPAD" --output gap_matrix.json
+    python gap_matrix.py --input evidence.json --self-product "主品名称" --output gap_matrix.json
 """
 
 import argparse
@@ -126,18 +126,18 @@ def build_gap_matrix(evidences: List[Dict], self_product: str) -> Dict:
     # 构建 gap 矩阵
     gap_matrix = []
     for aspect, comp_values in aspect_comp_value.items():
-        self_val = comp_values.get(self_product) or comp_values.get("self") or comp_values.get("商米") or comp_values.get("CPAD")
+        self_val = comp_values.get(self_product) or comp_values.get("self") or comp_values.get("main_product")
         level = infer_taxonomy_level(aspect)
         gap_directions = {}
         for comp, their_val in comp_values.items():
-            if comp == self_product or comp in ("self", "商米", "CPAD"):
+            if comp == self_product or comp in ("self", "main_product"):
                 continue
             gap_directions[comp] = determine_gap_direction(self_val, their_val, aspect)
         gap_matrix.append({
             "taxonomy_level": level,
             "aspect": aspect,
             "self_value": self_val,
-            "competitor_values": {k: v for k, v in comp_values.items() if k != self_product and k not in ("self", "商米", "CPAD")},
+            "competitor_values": {k: v for k, v in comp_values.items() if k != self_product and k not in ("self", "main_product")},
             "gap_directions": gap_directions,
             "decision_impact": aspect_decision_impact.get(aspect, "medium"),
             "evidence_ids": aspect_ev_ids[aspect],
@@ -210,7 +210,7 @@ def cmd_run(args):
 def main():
     parser = argparse.ArgumentParser(description="Stage A: Gap Matrix Generator")
     parser.add_argument("--input", required=True, help="evidence.json path")
-    parser.add_argument("--self-product", required=True, help="主品名称（如 商米 CPAD）")
+    parser.add_argument("--self-product", required=True, help="主品名称")
     parser.add_argument("--output", required=True, help="gap_matrix.json output path")
     args = parser.parse_args()
     cmd_run(args)

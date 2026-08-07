@@ -8,9 +8,9 @@
 报告中**每条事实声明**必须带 `[EV-xxxx]` 引用，文末附录列出证据全文。
 
 **声明**定义：任何可被验证的真伪命题，包括但不限于：
-- 规格类：「天之河 TZH-P13 屏幕 10.1 寸」
+- 规格类：「竞品 A 屏幕 10.1 寸」
 - 价格类：「经销商价 USD 245」
-- 渠道类：「iMin 在印度通过 distributor X 销售」
+- 渠道类：「竞品 A 通过 distributor X 销售」
 - VOC 类：「IT 管理员反馈安装复杂」
 
 **非声明**（无需引用）：分析结论、推荐建议、推理过程——但前提是结论必须基于已引用的证据。
@@ -21,10 +21,10 @@
 
 ```markdown
 # 正确示例
-天之河 TZH-P13 经销商价为 USD 245 [EV-2026-002]，较 list price 折扣约 30%。
+竞品 A 经销商价为 USD 245 [EV-2026-002]，较 list price 折扣约 30%。
 
 # 错误示例（无引用）
-天之河 TZH-P13 经销商价为 USD 245，较 list price 折扣约 30%。
+竞品 A 经销商价为 USD 245，较 list price 折扣约 30%。
 
 # 允许但需标记
 据行业惯例，B2B 硬件经销商毛利约 15-20% ⚠️ 未验证。
@@ -87,7 +87,7 @@
 ## 7. 多 Step 共享证据
 
 `stage=shared` 的证据可被各 Step 同时引用，避免重复存储。
-例如「天之河 TZH-P13 在印度上市」既是功能背景（Step 5）又是渠道事实（Step 5）。
+例如「竞品 A 在某市场上市」既是功能背景（Step 5）又是渠道事实（Step 5）。
 
 ## 8. 决策影响度过滤
 
@@ -109,12 +109,12 @@ Step 5 Review 阶段必须对每条证据评估 `decision_impact`：
 ## 证据附录
 
 ### EV-2026-001
-- competitor: iMin
-- product: 天之河 TZH-P13
+- competitor: 竞品A
+- product: 产品X
 - aspect: display_size
 - value: 10.1 inch
 - source_type: official_spec
-- source_url: file://evidence_db/cpad_competitive.xlsx#Sheet1
+- source_url: file://evidence_db/data.xlsx#Sheet1
 - source_date: 2026-04-11
 - confidence: high
 - verified_by: local_evidence_db

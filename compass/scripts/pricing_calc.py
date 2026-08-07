@@ -12,7 +12,7 @@ Compass 竞品分析 · Step 5: Pricing Calculator
 强制用 Python 做真实算术（Function Calling），禁止只用文字描述价格。
 
 Usage:
-    python pricing_calc.py --input evidence.json --self-product "商米 CPAD" --icp-value-metric per_inch_display --output pricing_analysis.json
+    python pricing_calc.py --input evidence.json --self-product "主品名称" --icp-value-metric per_inch_display --output pricing_analysis.json
 """
 
 import argparse
@@ -237,7 +237,7 @@ def cmd_run(args):
     all_stacks = []
     all_per_unit = []
     for comp in competitors:
-        if comp.lower() in (args.self_product.lower(), "self", "商米", "cpad"):
+        if comp.lower() in (args.self_product.lower(), "self", "main_product"):
             continue
         print(f"[analyze] competitor: {comp}", file=sys.stderr)
         stacks = reverse_engineer_discount_stack(price_evidences, comp)

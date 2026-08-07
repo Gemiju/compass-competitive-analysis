@@ -37,7 +37,7 @@
 - 或有 partner tier（Authorized / Gold / Platinum）
 - 同 SKU 多个价格列
 
-**典型场景**：B2B 硬件经销（如 iMin 印度价目表）。
+**典型场景**：B2B 硬件经销。
 
 ### 1.4 Subscription Pricing（订阅）
 
@@ -96,8 +96,8 @@ End-User Price
 
 ```json
 {
-  "competitor": "iMin",
-  "product": "天之河 TZH-P13",
+  "competitor": "竞品A",
+  "product": "产品X",
   "discount_stack": [
     {"layer": "list", "price_usd": 350, "evidence_id": "EV-2026-010"},
     {"layer": "distributor", "price_usd": 245, "discount_pct": 30.0, "evidence_id": "EV-2026-011"},
@@ -141,12 +141,12 @@ End-User Price
 高价值感知
     │
     │  Premium（高价值高价格）  │  Value Leader（高价值低价格）
-    │  - Apple iPad 商业版      │  - 商米 CPAD（目标定位）
+    │  - 高端商用平板           │  - 主品（目标定位）
     │                          │
 ────┼──────────────────────────┼──────────────────────────
     │                          │
     │  Overpriced（低价值高价格）│  Budget（低价值低价格）
-    │  - 部分竞品旗舰           │  - 天之河 TZH-P13
+    │  - 部分竞品旗舰           │  - 入门级竞品
     │                          │
 低价值感知
     低价格 ←─────────────────→ 高价格
@@ -155,7 +155,7 @@ End-User Price
 **绘制规则**：
 - X 轴：end_user_price（或 price_per_unit）
 - Y 轴：价值感知分（基于 Step 5 功能对标 + Step 5 VOC 情感综合得分）
-- 商米 CPAD 默认画在 Value Leader 象限作为目标定位
+- 主品默认画在 Value Leader 象限作为目标定位
 
 ---
 
@@ -189,13 +189,11 @@ End-User Price
 
 ---
 
-## 7. 与商米实习经历的呼应
+## 7. 产品落地映射
 
-Step 5 的输出必须能映射回用户简历的 2 项实习成果：
+Step 5 的输出必须能映射产品核心价值：
 
-| 实习成果 | Step 5 对应输出 |
+| 产品能力 | Step 5 对应输出 |
 |---|---|
-| 经营看板（Gen2/3 毛利优化） | 「低毛利区域识别」段落（基于 price_per_unit 反推毛利） |
-| 定价 SOP（AI Agent 回填价格，效率+70%） | 「定价模型识别」段落（自动化判定 value-based/cost-plus/tiered） |
-
-这是简历叙事闭环的关键。
+| 经营看板（毛利优化） | 「低毛利区域识别」段落（基于 price_per_unit 反推毛利） |
+| 定价 SOP（AI 自动化定价） | 「定价模型识别」段落（自动化判定 value-based/cost-plus/tiered） |
