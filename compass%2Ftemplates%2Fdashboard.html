@@ -1,0 +1,302 @@
+<!--
+  Compass 竞品分析 · HTML 仪表盘模板（Jinja2）
+
+  本文件是 render_report.py 的外部模板（可选）。
+  若不提供 --template 参数，render_report.py 使用内置 BUILTIN_TEMPLATE。
+  本模板作为「视觉规范参考」与「可定制入口」存在。
+
+  支持的 Jinja2 变量（由 render_report.py 注入）：
+    self_product, competitors, generated_at, market_region, time_window,
+    gap_count, gap_matrix, differentiation_opportunities, differentiation_count,
+    persona_count, message_house,
+    pricing_models, competitor_stacks, price_per_unit, elasticity_matrix, icp_value_metric,
+    evidence_count, high_confidence_pct, evidences, report_summary
+
+  设计原则：
+    1. 单文件 HTML，双击可打开（无外部依赖）
+    2. 5 个 Tab：Executive Summary / Feature / Pricing / Channel / Evidence
+    3. 每条声明带 [EV-xxxx] 引用，未带引用打 ⚠️ 未验证
+    4. 响应式布局，支持移动端查看
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compass 竞品分析 · {{ self_product }} vs {{ competitors|join(", ") }}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; background: #f5f5f7; color: #1d1d1f; line-height: 1.5; }
+  .header { background: linear-gradient(135deg, #1d1d1f 0%, #424245 100%); color: white; padding: 32px 48px; }
+  .header h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 600; }
+  .header .meta { font-size: 13px; opacity: 0.7; }
+  .tabs { display: flex; background: white; border-bottom: 1px solid #d2d2d7; position: sticky; top: 0; z-index: 10; overflow-x: auto; }
+  .tab { padding: 16px 24px; cursor: pointer; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 500; white-space: nowrap; }
+  .tab.active { border-bottom-color: #0071e3; color: #0071e3; }
+  .tab:hover { background: #f5f5f7; }
+  .panel { display: none; padding: 32px 48px; max-width: 1400px; margin: 0 auto; }
+  .panel.active { display: block; }
+  @media (max-width: 768px) { .panel { padding: 16px; } .header { padding: 20px 16px; } }
+  .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { margin: 0 0 16px 0; font-size: 20px; font-weight: 600; }
+  .card h3 { margin: 16px 0 8px 0; font-size: 16px; font-weight: 600; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .metric { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .metric .value { font-size: 32px; font-weight: 700; color: #0071e3; }
+  .metric .label { font-size: 11px; color: #6e6e73; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
+  th { background: #f5f5f7; font-weight: 600; position: sticky; top: 0; }
+  tr:hover { background: #fafafa; }
+  .ev-ref { color: #0071e3; font-size: 11px; font-family: "SF Mono", Menlo, monospace; cursor: pointer; }
+  .ev-ref:hover { text-decoration: underline; }
+  .warning { color: #ff9500; font-weight: 600; }
+  .quote { background: #f5f5f7; border-left: 3px solid #0071e3; padding: 12px 16px; margin: 12px 0; font-size: 13px; }
+  .quote .text { font-style: italic; color: #1d1d1f; }
+  .quote .meta { margin-top: 8px; font-size: 11px; color: #6e6e73; }
+  .persona-tag { display: inline-block; background: #e8f0fe; color: #1967d2; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-right: 4px; }
+  .sentiment-neg { color: #d93025; font-weight: 600; }
+  .sentiment-pos { color: #0d904f; font-weight: 600; }
+  .sentiment-neu { color: #5f6368; }
+  .impact-high { color: #d93025; font-weight: 600; }
+  .impact-med { color: #ff9500; }
+  .impact-low { color: #6e6e73; }
+  .gap-ahead { color: #0d904f; }
+  .gap-behind { color: #d93025; }
+  .gap-parity { color: #6e6e73; }
+  pre { background: #1d1d1f; color: #f5f5f7; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; }
+  .footer { text-align: center; padding: 32px; color: #6e6e73; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Compass 竞品分析 · {{ self_product }} vs {{ competitors|join(", ") }}</h1>
+  <div class="meta">生成时间: {{ generated_at }} | 市场: {{ market_region }} | 时间窗: {{ time_window }} | 证据: {{ evidence_count }} 条 (高置信度 {{ high_confidence_pct }}%)</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-panel="summary">Executive Summary</div>
+  <div class="tab" data-panel="feature">Feature Benchmark</div>
+  <div class="tab" data-panel="pricing">Pricing Strategy</div>
+  <div class="tab" data-panel="channel">Channel & GTM</div>
+  <div class="tab" data-panel="evidence">Evidence ({{ evidence_count }})</div>
+</div>
+
+<!-- ========== Tab 1: Executive Summary ========== -->
+<div class="panel active" id="panel-summary">
+  <div class="metric-grid">
+    <div class="metric"><div class="value">{{ gap_count }}</div><div class="label">功能差距项</div></div>
+    <div class="metric"><div class="value">{{ differentiation_count }}</div><div class="label">差异化机会</div></div>
+    <div class="metric"><div class="value">{{ persona_count }}</div><div class="label">Persona 覆盖</div></div>
+    <div class="metric"><div class="value">{{ evidence_count }}</div><div class="label">证据总数</div></div>
+    <div class="metric"><div class="value">{{ high_confidence_pct }}%</div><div class="label">高置信度占比</div></div>
+  </div>
+
+  <div class="card">
+    <h2>执行摘要</h2>
+    <div style="white-space: pre-wrap;">{{ report_summary|e }}</div>
+  </div>
+
+  <div class="card">
+    <h2>定价模型识别</h2>
+    <table>
+      <tr><th>竞品</th><th>定价模型</th><th>折扣栈深度</th><th>总折扣 %</th></tr>
+      {% for comp, model in pricing_models.items() %}
+      <tr>
+        <td>{{ comp }}</td>
+        <td>{{ model }}</td>
+        <td>{{ competitor_stacks | selectattr("competitor","equalto",comp) | list | first | attr('stacks') | first | attr('discount_stack') | length if competitor_stacks else '-' }}</td>
+        <td>{{ competitor_stacks | selectattr("competitor","equalto",comp) | list | first | attr('stacks') | first | attr('total_discount_pct') if competitor_stacks else '-' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>差异化机会 Top 3</h2>
+    {% for opp in differentiation_opportunities[:3] %}
+    <div style="margin-bottom: 12px;">
+      <strong>{{ opp.aspect }}</strong> ({{ opp.direction }} vs {{ opp.competitor }}):
+      {{ opp.opportunity }}
+      {% for eid in opp.evidence_ids %}<span class="ev-ref">[{{ eid }}]</span>{% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========== Tab 2: Feature Benchmark ========== -->
+<div class="panel" id="panel-feature">
+  <div class="card">
+    <h2>功能 Gap 矩阵 ({{ gap_count }} 项)</h2>
+    <table>
+      <tr>
+        <th>分类</th><th>维度</th><th>{{ self_product }}</th>
+        {% for c in competitors %}<th>{{ c }}</th>{% endfor %}
+        <th>差距方向</th><th>决策影响</th><th>证据</th>
+      </tr>
+      {% for gap in gap_matrix %}
+      <tr>
+        <td>{{ gap.taxonomy_level }}</td>
+        <td><strong>{{ gap.aspect }}</strong></td>
+        <td>{{ gap.self_value or '<span class="warning">⚠️ 未验证</span>' }}</td>
+        {% for c in competitors %}<td>{{ gap.competitor_values.get(c, '-') }}</td>{% endfor %}
+        <td>
+          {% for comp, d in gap.gap_directions.items() %}
+            <span class="gap-{{ 'ahead' if d=='ahead' else ('behind' if d=='behind' else 'parity') }}">{{ comp }}: {{ d }}</span>
+          {% endfor %}
+        </td>
+        <td class="impact-{{ 'high' if gap.decision_impact=='high' else ('med' if gap.decision_impact=='medium' else 'low') }}">{{ gap.decision_impact }}</td>
+        <td>{% for eid in gap.evidence_ids %}<span class="ev-ref">[{{ eid }}]</span> {% endfor %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>差异化机会 ({{ differentiation_count }})</h2>
+    {% for opp in differentiation_opportunities %}
+    <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e5e5ea;">
+      <strong>{{ opp.aspect }}</strong> · {{ opp.direction }} vs {{ opp.competitor }}
+      <div style="margin-top: 4px;">我方: {{ opp.self_value or '⚠️ 未验证' }} | 竞品: {{ opp.their_value or '⚠️ 未验证' }}</div>
+      <div style="margin-top: 8px;">{{ opp.opportunity }}</div>
+      <div style="margin-top: 4px;">{% for eid in opp.evidence_ids %}<span class="ev-ref">[{{ eid }}]</span>{% endfor %}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========== Tab 3: Pricing Strategy ========== -->
+<div class="panel" id="panel-pricing">
+  <div class="card">
+    <h2>折扣栈反推</h2>
+    {% for stack in competitor_stacks %}
+      {% for s in stack.stacks %}
+      <h3>{{ stack.competitor }} · {{ s.product }}</h3>
+      <table>
+        <tr><th>层级</th><th>价格 USD</th><th>折扣 %</th><th>置信度</th><th>证据</th></tr>
+        {% for layer in s.discount_stack %}
+        <tr>
+          <td>{{ layer.layer }}</td>
+          <td>{{ layer.price_usd }}</td>
+          <td>{{ layer.discount_pct if layer.discount_pct is not none else '-' }}</td>
+          <td>{{ layer.confidence }}</td>
+          <td><span class="ev-ref">[{{ layer.evidence_id }}]</span></td>
+        </tr>
+        {% endfor %}
+      </table>
+      <p><strong>总折扣</strong>: {{ s.total_discount_pct if s.total_discount_pct is not none else '<span class="warning">⚠️ 未验证</span>' }}%</p>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h2>Price-per-Unit ({{ icp_value_metric }})</h2>
+    <table>
+      <tr><th>竞品</th><th>产品</th><th>End-User Price</th><th>度量值</th><th>Price/Unit</th><th>证据</th></tr>
+      {% for p in price_per_unit %}
+      <tr>
+        <td>{{ p.competitor }}</td>
+        <td>{{ p.product }}</td>
+        <td>USD {{ p.end_user_price_usd }}</td>
+        <td>{{ p.metric_value or '<span class="warning">⚠️ 未验证</span>' }}</td>
+        <td>{{ p.price_per_unit or '<span class="warning">⚠️ 未验证</span>' }}</td>
+        <td><span class="ev-ref">[{{ p.evidence_id }}]</span></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>ICP 价格弹性矩阵</h2>
+    <table>
+      <tr><th>Persona</th><th>价格敏感度</th><th>价值感知</th><th>推荐策略</th></tr>
+      {% for e in elasticity_matrix %}
+      <tr>
+        <td><strong>{{ e.persona }}</strong></td>
+        <td>{{ e.price_sensitivity }}</td>
+        <td>{{ e.value_perception }}</td>
+        <td>{{ e.strategy }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>价格定位象限</h2>
+    <p>详见报告 Markdown 的 B.6 章节。X 轴 = end_user_price，Y 轴 = 价值感知分。</p>
+    <ul>
+      <li><strong>Premium</strong>（高价值高价格）：{{ positioning_quadrant.quadrants.premium | length }} 个竞品</li>
+      <li><strong>Value Leader</strong>（高价值低价格）：{{ positioning_quadrant.quadrants.value_leader | length }} 个竞品（目标定位：{{ self_product }}）</li>
+      <li><strong>Overpriced</strong>（低价值高价格）：{{ positioning_quadrant.quadrants.overpriced | length }} 个竞品</li>
+      <li><strong>Budget</strong>（低价值低价格）：{{ positioning_quadrant.quadrants.budget | length }} 个竞品</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== Tab 4: Channel & GTM ========== -->
+<div class="panel" id="panel-channel">
+  {% if persona_count < 3 %}
+  <div class="card" style="border-left: 4px solid #ff9500;">
+    <h2 class="warning">⚠️ Persona 多样性不足</h2>
+    <p>当前只覆盖 {{ persona_count }} 个 persona，低于 6 步框架质量门要求（≥3）。建议补充更多 persona 视角数据。</p>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>Message House 建议</h2>
+    <p>{{ message_house.recommendation }}</p>
+    {% for comp, pains in message_house.competitor_pain_points.items() %}
+    <h3>{{ comp }} Top 痛点</h3>
+    <ul>
+      {% for aspect, count in pains %}
+      <li>{{ aspect }} ({{ count }} 条负面反馈)</li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========== Tab 5: Evidence ========== -->
+<div class="panel" id="panel-evidence">
+  <div class="card">
+    <h2>证据库 ({{ evidence_count }} 条)</h2>
+    <table>
+      <tr>
+        <th>ID</th><th>竞品</th><th>产品</th><th>维度</th><th>值</th>
+        <th>来源类型</th><th>置信度</th><th>验证方式</th><th>Stage</th><th>日期</th><th>URL</th>
+      </tr>
+      {% for ev in evidences %}
+      <tr>
+        <td class="ev-ref">{{ ev.evidence_id }}</td>
+        <td>{{ ev.competitor }}</td>
+        <td>{{ ev.product or '-' }}</td>
+        <td>{{ ev.aspect }}</td>
+        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">{{ ev.value[:60] }}</td>
+        <td>{{ ev.source_type }}</td>
+        <td class="impact-{{ 'high' if ev.confidence=='high' else ('med' if ev.confidence=='medium' else 'low') }}">{{ ev.confidence }}</td>
+        <td>{{ ev.verified_by }}</td>
+        <td>{{ ev.stage }}</td>
+        <td>{{ ev.source_date }}</td>
+        <td style="font-size: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">{{ ev.source_url }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  Compass 竞品分析 · 基于 TRAE Skill · RAG 架构 · 每条声明带 [EV-xxxx] 引用 · 未带引用打 ⚠️ 未验证
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('panel-' + t.dataset.panel).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
